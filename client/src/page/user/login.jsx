@@ -22,7 +22,7 @@ function Login() {
           <form onSubmit={handleSubmit}>
             {/* Email Input */}
             <div className="mb-4">
-              <label htmlFor="username" className="block text-white font-semibold mb-2">Email</label>
+              <label htmlFor="username" className="block text-white font-semibold mb-2">Username</label>
               <input
                 type="text"
                 id="username"

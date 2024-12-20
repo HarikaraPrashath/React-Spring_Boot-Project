@@ -90,11 +90,11 @@ function UserProfile() {
   
         {/* User Details */}
         <div className="flex-[70%] text-center md:text-left">
-          <h2 className="text-3xl font-bold text-gray-800">{user ? user.user.name : "John Doe"}</h2>
+          <h2 className="text-3xl font-bold text-gray-800">{user ? user.username : "John Doe"}</h2>
           <p className="text-lg text-gray-600">Software Engineer at XYZ Company</p>
           <div className="mt-4 space-y-2">
             <p className="text-gray-700">
-              <span className="font-semibold">Email:</span> {user.user.email }
+              <span className="font-semibold">Email:</span> demo@gmail.com
             </p>
             <p className="text-gray-700">
               <span className="font-semibold">Phone:</span> +1 234 567 890

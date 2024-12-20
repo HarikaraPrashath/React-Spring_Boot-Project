@@ -1,6 +1,5 @@
 package com.hari.SpringBootRivo.service;
 
-
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,7 +11,7 @@ import java.util.Map;
 @Service
 public class CloudinaryService {
 
-    private  final Cloudinary cloudinary;
+    private final Cloudinary cloudinary;
 
     public CloudinaryService(
             @Value("${cloudinary.cloud_name}") String cloudName,
@@ -26,8 +25,15 @@ public class CloudinaryService {
         ));
     }
 
-
     public Map uploadImage(byte[] image) throws IOException {
-        return cloudinary.uploader().upload(image, ObjectUtils.asMap("resource_type", "auto"));
+        try {
+            // Upload the image with the 'auto' resource type
+            Map result = cloudinary.uploader().upload(image, ObjectUtils.asMap("resource_type", "auto"));
+            System.out.println("Cloudinary upload result: " + result);
+            return result;
+        } catch (Exception e) {
+            System.err.println("Cloudinary upload error: " + e.getMessage());
+            throw new IOException("Failed to upload image to Cloudinary", e);
+        }
     }
 }

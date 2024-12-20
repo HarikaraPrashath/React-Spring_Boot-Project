@@ -23,6 +23,7 @@ const login = async(username,password) =>{
     if(!response.ok){
         setIsLoading(false)
         setError(json.error)
+        return; // Stop execution if login fails
     }
 
 

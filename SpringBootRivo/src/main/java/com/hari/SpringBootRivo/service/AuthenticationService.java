@@ -42,7 +42,7 @@ public class AuthenticationService  {
     public AuthenticationResponce register(User request){
         //check if user already exist . if exist than authenticate the user
         if(userRepo.findByUsername(request.getUsername()).isPresent()){
-            return new AuthenticationResponce(null,null,"User already exits");
+            return new AuthenticationResponce(null,null,"User already exits",null,null,null);
         }
 
         User user = new User();
@@ -68,7 +68,7 @@ public class AuthenticationService  {
 
         saveUserToken(accessToken,refreshToken,user);
 
-        return  new AuthenticationResponce(accessToken,refreshToken,"User register was successfully done");
+        return  new AuthenticationResponce(accessToken,refreshToken,"User register was successfully done",user.getUsername(), user.getId(),user.getRole());
     }
 
 
@@ -87,7 +87,7 @@ public class AuthenticationService  {
 
         revokeAllTokenByUser(user);
         saveUserToken(accessToken, refreshToken, user);
-        return new AuthenticationResponce (accessToken, refreshToken, "User login was successful");
+        return new AuthenticationResponce (accessToken, refreshToken, "User login was successful",user.getUsername(),user.getId(),user.getRole());
     }
     private void revokeAllTokenByUser(User user) {
         List<Token> validTokens = tokenRepository.findAllAccessTokensByUser(user.getId());
@@ -138,7 +138,7 @@ public class AuthenticationService  {
             revokeAllTokenByUser(user);
             saveUserToken(accessToken, refreshToken, user);
 
-            return new ResponseEntity(new AuthenticationResponce (accessToken, refreshToken, "New token generated"), HttpStatus.OK);
+            return new ResponseEntity(new AuthenticationResponce (accessToken, refreshToken, "New token generated",user.getUsername(),user.getId(),user.getRole()), HttpStatus.OK);
         }
 
         return new ResponseEntity(HttpStatus.UNAUTHORIZED);

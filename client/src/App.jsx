@@ -26,7 +26,7 @@ function App() {
         <Route path='/login' element={!user ? <Login /> : <Navigate to="/" />} />
         <Route path='/register' element={!user ? <Register /> : <Navigate to="/" />} />
         <Route path='/shop' element={<Shop />} />
-        <Route path='/admin-dashboard' element={user?.isAdmin ? <AdminDashboard /> : <Navigate to="/login" />} />
+        <Route path='/admin-dashboard' element={user?.role ==="ADMIN" ? <AdminDashboard /> : <Navigate to="/login" />} />
         <Route path='/feature' element={<Feature />} />
         <Route path='/contact' element={<Contact />} />
         <Route path='/products' element={<Products />} />

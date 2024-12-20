@@ -28,6 +28,8 @@ public class ProductController {
     @PostMapping("/uploadimage")
     public ResponseEntity<?> handleImageUploadUrl(@RequestParam("my_file") MultipartFile file) {
         try {
+            System.out.println("Uploaded file: " + file.getOriginalFilename());
+            System.out.println("File size: " + file.getSize() + " bytes");
             byte[] bytes = file.getBytes();
             Map result = cloudinaryService.uploadImage(bytes);
             return ResponseEntity.ok().body(result);
@@ -37,26 +39,26 @@ public class ProductController {
         }
     }
 
-    @GetMapping
+    @GetMapping("/getAllProducts")
     public ResponseEntity<List<Products>> getAllProducts(){
         return ResponseEntity.ok(productService.getAllProducts());
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/singleProduct/{id}")
     public ResponseEntity<Products> getProductById(@PathVariable Integer id){
         return ResponseEntity.ok(productService.getProductById(id));
     }
 
-    @PostMapping
+    @PostMapping("/productCreate")
     public ResponseEntity<Products> createProduct (@RequestBody Products products){
         return ResponseEntity.ok(productService.createProduct(products));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<Products> updateProduct(@PathVariable Integer id, @RequestBody Products productDetails) {
         return ResponseEntity.ok(productService.updateProduct(id, productDetails));
     }
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Integer id) {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();

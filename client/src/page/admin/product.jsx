@@ -1,24 +1,29 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import axios from 'axios';
-import { FileIcon, UploadCloudIcon, XIcon } from 'lucide-react';
+import React, { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
+import axios from "axios";
+import { FileIcon, UploadCloudIcon, XIcon } from "lucide-react";
+import { useAuthContext } from '../../hook/useAuthContext';
 
 const initialFormData = {
   image: null,
-  productName: '',
-  price: '',
-  description: '',
+  productName: "",
+  price: "",
+  description: "",
   size: [],
-  color: '',
+  color: "",
 };
 
 function Products() {
+  const {user} = useAuthContext()
   const [formData, setFormData] = useState(initialFormData);
   const [imageFile, setImageFile] = useState(null);
-  const [uploadedImageUrl, setUploadedImageUrl] = useState('');
+  const [uploadedImageUrl, setUploadedImageUrl] = useState("");
   const [imageLoadingState, setImageLoadingState] = useState(false);
+  const [accessToken, setAccessToken] = useState(''); // debug 
   const inputRef = useRef(null);
 
+
+  //handle the form change
   const handleFormChange = (key, value) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -26,16 +31,26 @@ function Products() {
     }));
   };
 
+
+  // check from validation
   const isFormValid = () => {
-    return formData.productName && formData.price && formData.description && uploadedImageUrl;
+    return (
+      formData.productName &&
+      formData.price &&
+      formData.description &&
+      uploadedImageUrl
+    );
   };
 
+  //handle remove image
   const handleRemoveImage = () => {
     setImageFile(null);
-    setUploadedImageUrl('');
-    if (inputRef.current) inputRef.current.value = '';
+    setUploadedImageUrl("");
+    if (inputRef.current) inputRef.current.value = "";
   };
 
+
+//handle image file change
   const handleImageFileChange = (event) => {
     const selectedFile = event.target.files?.[0];
     if (selectedFile) {
@@ -43,31 +58,59 @@ function Products() {
     }
   };
 
+//   //get access token here that why we can move
+//  useEffect(() => {
+    
+//     console.log("Current user:", user );
+//   }, [user]);
+//   console.log("user data in product",user.Access_token)
+
+
+
   //upload to cloudinary API
   const uploadImageToCloudinary = async () => {
     setImageLoadingState(true);
+    
     const data = new FormData();
-    data.append('my_file', imageFile);
-    console.log([...data]);
-
+    data.append("my_file", imageFile);
+    console.log("Uploading image data:", [...data]);  // Check the form data being sent
+    
     try {
-      const response = await axios.post('http://localhost:5000/api/admin/product/uploadimage', data);
+      console.log("Sending request with token:", user.Access_token);
+      
+      const response = await axios.post(
+        "http://localhost:8080/products/uploadimage",
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${user.Access_token}`, // Ensure correct token
+          },
+        }
+      );
+      
+      console.log("Upload successful:", response.data);
+      
       if (response.data.success) {
         setUploadedImageUrl(response.data.result.url);
       }
     } catch (error) {
-      console.error('Image upload failed:', error);
+      console.error("Image upload failed:", error);
+      console.error("Error details:", error.response ? error.response.data : error.message);  // Check detailed error response
     } finally {
       setImageLoadingState(false);
     }
   };
-
+  
+  //upload the image to cloudinary and get it link from cloudinary
   useEffect(() => {
     if (imageFile) {
       uploadImageToCloudinary();
     }
   }, [imageFile]);
 
+
+
+  //marge the image url with product data
   useEffect(() => {
     if (uploadedImageUrl) {
       setFormData((prevData) => ({
@@ -77,41 +120,40 @@ function Products() {
     }
   }, [uploadedImageUrl]);
 
-//onsubmit method
- 
-const onSubmit = async (e) => {
-  e.preventDefault();
+  //onsubmit method
+  const onSubmit = async (e) => {
+    e.preventDefault();
 
-  if (imageLoadingState) {
-    alert('Please wait for the image upload to complete.');
-    return;
-  }
+    if (imageLoadingState) {
+      alert("Please wait for the image upload to complete.");
+      return;
+    }
 
-  if (!uploadedImageUrl) {
-    alert('Please upload an image before submitting.');
-    return;
-  }
+    if (!uploadedImageUrl) {
+      alert("Please upload an image before submitting.");
+      return;
+    }
 
-  try {
-    const result = await axios.post(
-      'http://localhost:5000/api/admin/product/add',
-      formData,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    try {
+      const result = await axios.post(
+        "http://localhost:8080/products/productCreate",
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-    console.log('Product added successfully:', result.data);
-    setFormData(initialFormData);
-    setUploadedImageUrl('');
-    setImageFile(null);
-  } catch (error) {
-    console.error('Error adding product:', error);
-    alert('Failed to add the product. Please try again.');
-  }
-};
+      console.log("Product added successfully:", result.data);
+      setFormData(initialFormData);
+      setUploadedImageUrl("");
+      setImageFile(null);
+    } catch (error) {
+      console.error("Error adding product:", error);
+      alert("Failed to add the product. Please try again.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -140,7 +182,9 @@ const onSubmit = async (e) => {
               >
                 <UploadCloudIcon className="w-10 h-10 text-green-500 mb-2" />
                 <span className="font-semibold">Click to upload an image</span>
-                <span className="text-sm text-green-500">(Supported formats: JPG, PNG, GIF)</span>
+                <span className="text-sm text-green-500">
+                  (Supported formats: JPG, PNG, GIF)
+                </span>
                 <input
                   type="file"
                   id="imageUpload"
@@ -153,7 +197,9 @@ const onSubmit = async (e) => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <FileIcon className="w-8 h-8 text-green-500 mr-2" />
-                  <p className="text-sm font-medium truncate">{imageFile.name}</p>
+                  <p className="text-sm font-medium truncate">
+                    {imageFile.name}
+                  </p>
                 </div>
                 <button
                   type="button"
@@ -168,78 +214,86 @@ const onSubmit = async (e) => {
 
           {/* Form Fields */}
           <div>
-            <label className="block text-gray-600 font-medium mb-1">Product Name</label>
+            <label className="block text-gray-600 font-medium mb-1">
+              Product Name
+            </label>
             <input
               type="text"
               value={formData.productName}
-              onChange={(e) => handleFormChange('productName', e.target.value)}
+              onChange={(e) => handleFormChange("productName", e.target.value)}
               placeholder="Enter product name"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg"
             />
           </div>
           <div>
-            <label className="block text-gray-600 font-medium mb-1">Price</label>
+            <label className="block text-gray-600 font-medium mb-1">
+              Price
+            </label>
             <input
               type="number"
               value={formData.price}
-              onChange={(e) => handleFormChange('price', e.target.value)}
+              onChange={(e) => handleFormChange("price", e.target.value)}
               placeholder="Enter price"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg"
             />
           </div>
           <div>
-            <label className="block text-gray-600 font-medium mb-1">Description</label>
+            <label className="block text-gray-600 font-medium mb-1">
+              Description
+            </label>
             <textarea
               value={formData.description}
-              onChange={(e) => handleFormChange('description', e.target.value)}
+              onChange={(e) => handleFormChange("description", e.target.value)}
               placeholder="Enter product description"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg"
             />
           </div>
           {/* Size */}
-<div>
-  <label className="block text-gray-600 font-medium mb-1">Size</label>
-  <div className="flex items-center gap-4">
-    {['Small', 'Large', 'XL'].map((size) => (
-      <label key={size} className="flex items-center">
-        <input
-          type="checkbox"
-          className="mr-2 border-gray-300 focus:ring-green-500"
-          value={size.toLowerCase()}
-          checked={formData.size.includes(size.toLowerCase())}
-          onChange={(e) => {
-            const newSize = e.target.value;
-            const updatedSize = formData.size.includes(newSize)
-              ? formData.size.filter((s) => s !== newSize)
-              : [...formData.size, newSize];
-            handleFormChange('size', updatedSize);
-          }}
-        />
-        {size}
-      </label>
-    ))}
-  </div>
-</div>
+          <div>
+            <label className="block text-gray-600 font-medium mb-1">Size</label>
+            <div className="flex items-center gap-4">
+              {["Small", "Large", "XL"].map((size) => (
+                <label key={size} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    className="mr-2 border-gray-300 focus:ring-green-500"
+                    value={size.toLowerCase()}
+                    checked={formData.size.includes(size.toLowerCase())}
+                    onChange={(e) => {
+                      const newSize = e.target.value;
+                      const updatedSize = formData.size.includes(newSize)
+                        ? formData.size.filter((s) => s !== newSize)
+                        : [...formData.size, newSize];
+                      handleFormChange("size", updatedSize);
+                    }}
+                  />
+                  {size}
+                </label>
+              ))}
+            </div>
+          </div>
 
-{/* Color */}
-<div>
-  <label className="block text-gray-600 font-medium mb-1">Color</label>
-  <div className="flex items-center gap-4">
-    {['Blue', 'Red', 'Yellow', 'Green'].map((color) => (
-      <label key={color} className="flex items-center">
-        <input
-          type="radio"
-          name="color"
-          value={color.toLowerCase()}
-          checked={formData.color === color.toLowerCase()}
-          onChange={(e) => handleFormChange('color', e.target.value)}
-          className="mr-2 border-gray-300 focus:ring-green-500"
-        />
-        {color}
-      </label>
-    ))}
-  </div>
-</div>
+          {/* Color */}
+          <div>
+            <label className="block text-gray-600 font-medium mb-1">
+              Color
+            </label>
+            <div className="flex items-center gap-4">
+              {["Blue", "Red", "Yellow", "Green"].map((color) => (
+                <label key={color} className="flex items-center">
+                  <input
+                    type="radio"
+                    name="color"
+                    value={color.toLowerCase()}
+                    checked={formData.color === color.toLowerCase()}
+                    onChange={(e) => handleFormChange("color", e.target.value)}
+                    className="mr-2 border-gray-300 focus:ring-green-500"
+                  />
+                  {color}
+                </label>
+              ))}
+            </div>
+          </div>
 
           {/* Submit Button */}
           <button

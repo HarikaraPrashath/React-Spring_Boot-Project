@@ -5,16 +5,22 @@ import { useAuthContext } from '../../hook/useAuthContext';
 function NavbarOther() {
   const {user} = useAuthContext()
 
+  // useEffect(() => {
+  //   if (user && user.user) {
+  //     console.log("User from AuthContext in navbar", user);
+  //     console.log("User id:", user.user.id);
+  //     console.log("User email:", user.user.email);
+  //   } else {
+  //     console.log("User is null or undefined");
+  //   }
+  // }, [user]);
+  
   useEffect(() => {
-    if (user && user.user) {
-      console.log("User from AuthContext in navbar", user);
-      console.log("User id:", user.user.id);
-      console.log("User email:", user.user.email);
-    } else {
-      console.log("User is null or undefined");
-    }
+    
+    console.log("Current user:", user );
   }, [user]);
 
+  // console.log("User from AuthContext in navbar", user.username);
   return (
     <div>
       <div className="relative flex items-center justify-between px-8 py-4 backdrop-blur-md bg-green-900 ">
@@ -43,25 +49,38 @@ function NavbarOther() {
 
         {/* Login Section */}
         <div className="flex-[20%] flex justify-end items-center gap-4">
-        {user ? (
-        <div className="flex flex-col items-end text-right space-y-2">
-          <p className="text-sm text-gray-700 font-medium"></p>
-          <Link
-            className="bg-green-600 text-white py-2 px-6 rounded-lg shadow hover:bg-green-700 hover:shadow-lg transition duration-300"
-            to={`/userProfile/${user.user.id}`}
-          >
-            Profile
-          </Link>
-        </div>
-      ) : (
+  {user ? (
+    user.role === "ADMIN" ? (
+      <>
+        <p className="text-white font-bold">{user.username}</p>
         <Link
-          to="/login"
+          to="/admin-dashboard"
           className="bg-green-600 text-white py-2 px-6 rounded-lg shadow hover:bg-green-700 hover:shadow-lg transition duration-300"
         >
-          Login
+          Dashboard
         </Link>
-      )}
+      </>
+    ) : (
+      <>
+        <p className="text-white font-bold">{user.username}</p>
+        <Link
+          to={`/userProfile/${user.id}`}
+          className="bg-green-600 text-white py-2 px-6 rounded-lg shadow hover:bg-green-700 hover:shadow-lg transition duration-300"
+        >
+          Profile
+        </Link>
+      </>
+    )
+  ) : (
+    <Link
+      to="/login"
+      className="bg-green-600 text-white py-2 px-6 rounded-lg shadow hover:bg-green-700 hover:shadow-lg transition duration-300"
+    >
+      Login
+    </Link>
+  )}
 </div>
+
       </div>
     </div>
   );
