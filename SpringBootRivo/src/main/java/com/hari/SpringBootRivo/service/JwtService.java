@@ -43,6 +43,12 @@ public class JwtService {
                 .findByAccessToken(token)
                 .map(t->t.isLoggedOut())
                 .orElse(false);
+        boolean tokenNotExpired = !isTokenExpired(token);
+//no problem in JWT
+//        System.out.println("Username from token: " + username);
+//        System.out.println("Expected username: " + user.getUsername());
+//        System.out.println("Is token logged out: " + !validToken);
+//        System.out.println("Is token expired: " + tokenNotExpired);
 
         return (username.equals(user.getUsername())) && !isTokenExpired(token) && validToken;
 

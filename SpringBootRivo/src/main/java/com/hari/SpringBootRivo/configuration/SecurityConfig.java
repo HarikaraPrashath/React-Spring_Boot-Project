@@ -54,7 +54,6 @@ public class SecurityConfig {
                         req->req.requestMatchers("/login/**","/register/**","/refresh_token/**")
                                 .permitAll()
                                 .requestMatchers("/products/**").hasAuthority("ADMIN")
-                                .requestMatchers("/admin_only/**").hasAnyAuthority("ADMIN")
                                 .anyRequest()
                                 .authenticated()
                 ).userDetailsService(userDetailsServiceImp)
@@ -63,12 +62,11 @@ public class SecurityConfig {
                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(
-                        e->e.accessDeniedHandler(
-                                (request, response, accessDeniedException) -> response.setStatus(403)
-                        )
-                                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-                )
+                .exceptionHandling(e -> e.authenticationEntryPoint((request, response, authException) -> {
+                    System.out.println("Auth error: " + authException.getMessage());
+                    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                }))
+
                 .logout(l->l
                         .logoutUrl("/logout")
                         .addLogoutHandler(customerLogoutHandler)

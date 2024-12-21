@@ -14,33 +14,31 @@ public class ProductService {
         this.productRepo = productRepo;
     }
 
-    public List<Products> getAllProducts(){
+    public List<Products> getAllProducts() {
         return productRepo.findAll();
     }
 
-    public Products getProductById(Integer id){
+    public Products getProductById(Integer id) {
         return productRepo.findById(id)
-                .orElseThrow(()->new RuntimeException("Product not found"));
+                .orElseThrow(() -> new RuntimeException("Product not found"));
     }
 
-    public Products createProduct(Products product){
+    public Products createProduct(Products product) {
         return productRepo.save(product);
     }
 
-    public Products updateProduct(Integer id,Products productDetails){
-        Products products = getProductById(id);
-        products.setName(productDetails.getName());
-        products.setDescription(productDetails.getName());
-        products.setPrice(productDetails.getPrice());
-        products.setSize(productDetails.getSize());
-        products.setColor(productDetails.getColor());
-        products.setImageUrl(productDetails.getImageUrl());
-
-        return productRepo.save(products);
+    public Products updateProduct(Integer id, Products productDetails) {
+        Products product = getProductById(id);
+        product.setName(productDetails.getName());
+        product.setDescription(productDetails.getDescription());
+        product.setPrice(productDetails.getPrice());
+        product.setSize(productDetails.getSize());
+        product.setColor(productDetails.getColor());
+        product.setImageUrl(productDetails.getImageUrl());
+        return productRepo.save(product);
     }
 
-
-    public void deleteProduct(Integer id){
+    public void deleteProduct(Integer id) {
         Products product = getProductById(id);
         productRepo.delete(product);
     }

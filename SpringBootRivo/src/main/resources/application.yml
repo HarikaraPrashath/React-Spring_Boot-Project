@@ -29,3 +29,7 @@ cloudinary:
   cloud_name: dgwapjtbp
   api_key: 976424464932446
   api_secret: _Wr7ONrD2FVXTFp8P5WlWPXj6h4
+
+logging:
+  level:
+    org.springframework.security: DEBUG

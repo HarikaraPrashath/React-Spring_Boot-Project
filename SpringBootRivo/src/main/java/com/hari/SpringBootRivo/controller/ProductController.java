@@ -4,6 +4,7 @@ import com.hari.SpringBootRivo.model.Products;
 import com.hari.SpringBootRivo.service.CloudinaryService;
 import com.hari.SpringBootRivo.service.ProductService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
