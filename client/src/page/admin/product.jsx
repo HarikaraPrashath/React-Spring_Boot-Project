@@ -14,16 +14,14 @@ const initialFormData = {
 };
 
 function Products() {
-  const {user} = useAuthContext()
+  const { user } = useAuthContext();
   const [formData, setFormData] = useState(initialFormData);
   const [imageFile, setImageFile] = useState(null);
   const [uploadedImageUrl, setUploadedImageUrl] = useState("");
   const [imageLoadingState, setImageLoadingState] = useState(false);
-  const [accessToken, setAccessToken] = useState(''); // debug 
   const inputRef = useRef(null);
 
-
-  //handle the form change
+  // Handle the form change
   const handleFormChange = (key, value) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -31,26 +29,14 @@ function Products() {
     }));
   };
 
-
-  // check from validation
-  const isFormValid = () => {
-    return (
-      formData.productName &&
-      formData.price &&
-      formData.description &&
-      uploadedImageUrl
-    );
-  };
-
-  //handle remove image
+  // Handle remove image
   const handleRemoveImage = () => {
     setImageFile(null);
     setUploadedImageUrl("");
     if (inputRef.current) inputRef.current.value = "";
   };
 
-
-//handle image file change
+  // Handle image file change
   const handleImageFileChange = (event) => {
     const selectedFile = event.target.files?.[0];
     if (selectedFile) {
@@ -58,40 +44,46 @@ function Products() {
     }
   };
 
-//   //get access token here that why we can move
-//  useEffect(() => {
-    
-//     console.log("Current user:", user );
-//   }, [user]);
-//   console.log("user data in product",user.Access_token)
+  // Get access token here that why we can move
+  useEffect(() => {
+    if (user) {
+      console.log("Current user in product:", user);
+    }
+  }, [user]);
 
-
-
-  //upload to cloudinary API
+  // Upload to cloudinary API
   const uploadImageToCloudinary = async () => {
     setImageLoadingState(true);
-    
+
     const data = new FormData();
     data.append("my_file", imageFile);
     console.log("Uploading image data:", [...data]);  // Check the form data being sent
-    
+
     try {
-      console.log("Sending request with token:", user.Access_token);
-      
-      const response = await axios.post(
-        "http://localhost:8080/products/uploadimage",
-        data,
-        {
-          headers: {
-            Authorization: `Bearer ${user.Access_token}`, // Ensure correct token
-          },
+      if (user && user.Access_token) {
+        console.log("Sending request with token:", user.Access_token);
+
+        const response = await axios.post(
+          "http://localhost:8080/products/uploadimage",
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${user.Access_token}`, // Ensure correct token
+            },
+          }
+        );
+
+        console.log("Upload successful:", response.data);
+        const imageUrl = response.data.secure_url || response.data.url;
+
+        if (imageUrl) {
+          setUploadedImageUrl(imageUrl); // Update the state with the image URL
+          console.log("Image URL updated:", imageUrl);
+        } else {
+          console.error("Image URL not found in response:", response.data);
         }
-      );
-      
-      console.log("Upload successful:", response.data);
-      
-      if (response.data.success) {
-        setUploadedImageUrl(response.data.result.url);
+      } else {
+        console.error("User is not authenticated.");
       }
     } catch (error) {
       console.error("Image upload failed:", error);
@@ -100,17 +92,15 @@ function Products() {
       setImageLoadingState(false);
     }
   };
-  
-  //upload the image to cloudinary and get it link from cloudinary
+
+  // Upload the image to cloudinary and get it link from cloudinary
   useEffect(() => {
     if (imageFile) {
       uploadImageToCloudinary();
     }
   }, [imageFile]);
 
-
-
-  //marge the image url with product data
+  // Merge the image URL with product data
   useEffect(() => {
     if (uploadedImageUrl) {
       setFormData((prevData) => ({
@@ -120,40 +110,48 @@ function Products() {
     }
   }, [uploadedImageUrl]);
 
-  //onsubmit method
-  const onSubmit = async (e) => {
-    e.preventDefault();
-
-    if (imageLoadingState) {
-      alert("Please wait for the image upload to complete.");
-      return;
-    }
-
-    if (!uploadedImageUrl) {
-      alert("Please upload an image before submitting.");
-      return;
-    }
-
-    try {
-      const result = await axios.post(
-        "http://localhost:8080/products/productCreate",
-        formData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
+  // Onsubmit method
+    const onSubmit = async (e) => {
+      e.preventDefault();
+    
+      if (imageLoadingState) {
+        alert("Please wait for the image upload to complete.");
+        return;
+      }
+    
+      if (!uploadedImageUrl) {
+        alert("Please upload an image before submitting.");
+        return;
+      }
+    
+      if (user && user.Access_token) {
+        console.log("Form Data before submission:", formData);
+        console.log("Authorization Token:", user.Access_token);
+    
+        try {
+          const result = await axios.post(
+            "http://localhost:8080/products/productCreate",
+            formData,
+            {
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${user.Access_token}`,
+              },
+            }
+          );
+    
+          console.log("Product added successfully:", result.data);
+          setFormData(initialFormData);
+          setUploadedImageUrl("");
+          setImageFile(null);
+        } catch (error) {
+          console.error("Error adding product:", error.response?.data || error.message);
         }
-      );
-
-      console.log("Product added successfully:", result.data);
-      setFormData(initialFormData);
-      setUploadedImageUrl("");
-      setImageFile(null);
-    } catch (error) {
-      console.error("Error adding product:", error);
-      alert("Failed to add the product. Please try again.");
-    }
-  };
+      } else {
+        alert("User is not authenticated. Please log in.");
+      }
+    };
+    
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -298,7 +296,6 @@ function Products() {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={!isFormValid()}
             className="w-full bg-green-600 text-white py-2 rounded-lg shadow-lg hover:bg-green-700"
           >
             Add Product

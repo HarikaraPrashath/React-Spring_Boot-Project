@@ -66,12 +66,13 @@ public class SecurityConfig {
                     System.out.println("Auth error: " + authException.getMessage());
                     response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 }))
+                .build();
 
-                .logout(l->l
-                        .logoutUrl("/logout")
-                        .addLogoutHandler(customerLogoutHandler)
-                        .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
-                ).build();
+//                .logout(l->l
+//                        .logoutUrl("/logout")
+//                        .addLogoutHandler(customerLogoutHandler)
+//                        .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
+//                ).build();
     }
 
     @Bean
