@@ -4,7 +4,6 @@ import com.hari.SpringBootRivo.model.Products;
 import com.hari.SpringBootRivo.service.CloudinaryService;
 import com.hari.SpringBootRivo.service.ProductService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,14 +16,13 @@ import java.util.Map;
 @CrossOrigin(origins = "http://localhost:5173")
 public class ProductController {
 
-    private  final ProductService productService;
+    private final ProductService productService;
     private final CloudinaryService cloudinaryService;
 
     public ProductController(ProductService productService, CloudinaryService cloudinaryService) {
         this.productService = productService;
         this.cloudinaryService = cloudinaryService;
     }
-
 
     @PostMapping("/uploadimage")
     public ResponseEntity<?> handleImageUploadUrl(@RequestParam("my_file") MultipartFile file) {
@@ -41,17 +39,17 @@ public class ProductController {
     }
 
     @GetMapping("/getAllProducts")
-    public ResponseEntity<List<Products>> getAllProducts(){
+    public ResponseEntity<List<Products>> getAllProducts() {
         return ResponseEntity.ok(productService.getAllProducts());
     }
 
     @GetMapping("/singleProduct/{id}")
-    public ResponseEntity<Products> getProductById(@PathVariable Integer id){
+    public ResponseEntity<Products> getProductById(@PathVariable Integer id) {
         return ResponseEntity.ok(productService.getProductById(id));
     }
 
     @PostMapping("/productCreate")
-    public ResponseEntity<Products> createProduct (@RequestBody Products products){
+    public ResponseEntity<Products> createProduct(@RequestBody Products products) {
         return ResponseEntity.ok(productService.createProduct(products));
     }
 
@@ -59,6 +57,7 @@ public class ProductController {
     public ResponseEntity<Products> updateProduct(@PathVariable Integer id, @RequestBody Products productDetails) {
         return ResponseEntity.ok(productService.updateProduct(id, productDetails));
     }
+
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Integer id) {
         productService.deleteProduct(id);

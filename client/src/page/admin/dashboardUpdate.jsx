@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+import { useAuthContext } from '../../hook/useAuthContext';
 
 function DashboardUpdate() {
-    const [productName, setProductName] = useState("");
+    const { user } = useAuthContext();
+    const [name, setName] = useState("");
     const [price, setPrice] = useState("");
     const [description, setDescription] = useState("");
     const [size, setSize] = useState("");
@@ -17,15 +19,17 @@ function DashboardUpdate() {
     // Fetch the product details when the component mounts
     useEffect(() => {
         axios
-            .get(`http://localhost:5000/api/admin/product/getOne/${id}`)
+            .get(
+                `http://localhost:8080/products/singleProduct/${id}`
+                )
             .then((response) => {
-                const product = response.data.data;
-                setProductName(product.productName || "");
+                const product = response.data;
+                setName(product.name || "");
                 setPrice(product.price || "");
                 setDescription(product.description || "");
                 setSize(product.size || "");
                 setColor(product.color || "");
-                setCurrentImage(product.image || ""); // Store the current image URL
+                setCurrentImage(product.imageUrl || ""); // Set the image URL
             })
             .catch((err) => console.error(err));
     }, [id]);
@@ -33,29 +37,38 @@ function DashboardUpdate() {
     // Handle form submission
     const handleUpdate = (e) => {
         e.preventDefault();
-
+    
         // Create form data to send, including an image file if uploaded
         const formData = new FormData();
-        formData.append("productName", productName);
+        formData.append("name", name);
         formData.append("price", price);
         formData.append("description", description);
         formData.append("size", size);
         formData.append("color", color);
         if (imageFile) {
-            formData.append("image", imageFile);
+            formData.append("imageUrl", imageFile);
         }
-
+    
+        // Log the token to ensure it's set
+        console.log("Authorization Token:", user.Access_token);
+      
+    
         axios
-            .put(`http://localhost:5000/api/admin/product/updateOne/${id}`, formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            })
+            .put(`http://localhost:8080/products/update/${id}`, formData, 
+                {
+                    headers: {
+                      "Content-Type": "multipart/form-data",
+                      Authorization: `Bearer ${user.Access_token}`, // Ensure correct token
+                    },
+                  }
+            )
             .then(() => {
                 alert("Product updated successfully!");
                 navigate("/admin-dashboard");
             })
-            .catch((err) => console.error(err));
+            .catch((err) => {
+                console.error("Error updating product:", err.response?.data || err.message);
+            });
     };
 
     const handleImageFileChange = (e) => {
@@ -129,8 +142,8 @@ function DashboardUpdate() {
                         <label className="block text-gray-600 font-medium mb-1">Product Name</label>
                         <input
                             type="text"
-                            value={productName}
-                            onChange={(e) => setProductName(e.target.value)}
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
                             placeholder="Enter product name"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                         />

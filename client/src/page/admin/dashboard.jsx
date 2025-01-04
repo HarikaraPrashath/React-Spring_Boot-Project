@@ -1,25 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom'; 
 import axios from "axios";
+import { useAuthContext } from '../../hook/useAuthContext';
 
 
 function Dashboard() {
+   const { user } = useAuthContext();
   const[users,setUser] = useState([])
 
   //fetching data and showcase in dashboard
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/admin/product/getAll")
+      .get(
+        "http://localhost:8080/products/getAllProducts"
+        
+      )
       .then((result) => {
         // Set the fetched data to the state
-        setUser(result.data.data); // Ensure 'data' points to your array of users
+        setUser(result.data); // Ensure 'data' points to your array of users
       })
       .catch((err) => console.log(err)); // Handle any error
   }, []);
   
   const handleDelete = (id) => {
     axios
-      .delete(`http://localhost:5000/api/admin/product/delete/${id}`)
+      .delete(
+        `http://localhost:8080/products/delete/${id}`
+        )
       .then((res) => {
         console.log(res);
         window.location.reload();
@@ -61,45 +68,43 @@ function Dashboard() {
         </tr>
       </thead>
       <tbody>
-        {users.map((result) => (
-          <tr key={result._id} className="border-t">
-            {/* ID */}
-            <td className="px-6 py-3 text-sm text-gray-700">{result._id}</td>
-            {/* Product Name */}
-            <td className="px-6 py-3 text-sm font-bold text-gray-800">{result.productName}</td>
-            {/* Description */}
-            <td className="px-6 py-3 text-sm text-gray-600">{result.description}</td>
-            {/* Price */}
-            <td className="px-6 py-3 text-sm font-bold text-green-700">{result.price}</td>
-            {/* Image */}
-            <td className="px-6 py-3">
-              <img
-                src={result.image}
-                alt={result.productName}
-                className="w-16 h-16 object-cover rounded-lg"
-              />
-            </td>
-            {/* Actions */}
-            <td className="px-6 py-3 text-center space-x-4">
-              {/* Update Button */}
-              <Link
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm rounded-lg"
-                to={`/productsUpdate/${result._id}`}
-             
-              >
-                Update
-              </Link>
-              {/* Delete Button */}
-              <button
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 text-sm rounded-lg"
-                onClick={() => handleDelete(result._id)} // Add your delete logic
-              >
-                Delete
-              </button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
+  {users.map((result, index) => (
+    <tr key={result._id || index} className="border-t">
+      {/* ID */}
+      <td className="px-6 py-3 text-sm text-gray-700">{result.id}</td>
+      {/* Product Name */}
+      <td className="px-6 py-3 text-sm font-bold text-gray-800">{result.name}</td>
+      {/* Description */}
+      <td className="px-6 py-3 text-sm text-gray-600">{result.description}</td>
+      {/* Price */}
+      <td className="px-6 py-3 text-sm font-bold text-green-700">{result.price}</td>
+      {/* Image */}
+      <td className="px-6 py-3">
+        <img
+          src={result.imageUrl}
+          alt={result.name}
+          className="w-16 h-16 object-cover rounded-lg"
+        />
+      </td>
+      {/* Actions */}
+      <td className="px-6 py-3 text-center space-x-4">
+        <Link
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm rounded-lg"
+          to={`/productsUpdate/${result.id}`}
+        >
+          Update
+        </Link>
+        <button
+          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 text-sm rounded-lg"
+          onClick={() => handleDelete(result.id)}
+        >
+          Delete
+        </button>
+      </td>
+    </tr>
+  ))}
+</tbody>
+
     </table>
   </div>
 </div>

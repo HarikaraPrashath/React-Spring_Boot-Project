@@ -5,6 +5,7 @@ import { useLogout } from '../../hook/useLogout';
 import { useNavigate } from 'react-router-dom';
 import { useOrderPlacement } from "../../hook/useOrderPlacement"
 import { useAuthContext } from "../../hook/useAuthContext"
+import { use } from 'react';
 
 
 
@@ -15,9 +16,10 @@ function UserProfile() {
   const {user} = useAuthContext()
   const { id } = useParams(); 
   const [userData, setUserData] = useState(null);
-
   const { logout } = useLogout();
   const navigate = useNavigate();
+
+
 
   // Logout Method
   const handleClick = () => {
@@ -26,29 +28,30 @@ function UserProfile() {
   };
 
  
-
+console.log("user",user.
+  Access_token
+  )
 
 
   useEffect(() => {
     const fetchWorkouts = async () => {
       
-        if (!user || !user.token) {
+        if (!user || !user. Access_token) {
           console.error("No user or token available");
           return;
         }
         try {
       
   
-        const response = await fetch('http://localhost:5000/api/order/getorderlist', {
+        const response = await fetch('http://localhost:8080/OrderPlace/getAllOrders', {
           method:'GET',
           headers: { 
-            'Authorization': `Bearer ${user.token}`,
+            'Authorization': `Bearer ${user. Access_token}`,
             'Content-Type': 'application/json', 
          },
         });
         console.log("Authorization Header inside the use Effect:", `Bearer ${user.token}`);
-        // console.log("Response Status:", response.status);
-        // console.log("Response Headers:", response.headers);
+        
         console.log("Request Headers:", {
           'Authorization': `Bearer ${user.token}`,
         });
@@ -125,25 +128,25 @@ function UserProfile() {
   
         <div className="space-y-4">
         {productForUser && productForUser.length > 0 ? (
-      productForUser.map((result) => {
+      productForUser.map((result,index) => {
     if (user && user.id === result.id) {
       return (
-        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-100 transition-all" key={result._id}>
+        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-100 transition-all" key={result.id ||index}>
           <div className="flex items-center gap-4">
             <img
-              src="https://via.placeholder.com/80" // Placeholder image for order item
+              src={result.image} // Placeholder image for order item
               alt="order item"
               className="h-20 w-20 object-cover rounded-lg"
             />
             <div>
               <p className="font-medium text-gray-800">{result.productName}</p>
-              <p className="text-gray-600">Order ID: {result._id}</p>
+              <p className="text-gray-600">Order ID: {result.id}</p>
             </div>
           </div>
 
           <div className="text-right">
             <p className="text-gray-700 font-semibold">Status: Delivered</p>
-            <p className="text-gray-600">Total: {result.productPrice}/=</p>
+            <p className="text-gray-600">Total: {result.price}/=</p>
             <button className="mt-2 text-sm text-blue-500 hover:underline">View Details</button>
           </div>
         </div>

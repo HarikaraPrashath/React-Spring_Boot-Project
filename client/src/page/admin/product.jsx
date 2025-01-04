@@ -54,44 +54,37 @@ function Products() {
   // Upload to cloudinary API
   const uploadImageToCloudinary = async () => {
     setImageLoadingState(true);
-
+  
     const data = new FormData();
     data.append("my_file", imageFile);
-    console.log("Uploading image data:", [...data]);  // Check the form data being sent
-
+    console.log("Uploading image data:", [...data]); // Check the form data being sent
+  
     try {
-      if (user && user.Access_token) {
-        console.log("Sending request with token:", user.Access_token);
-
-        const response = await axios.post(
-          "http://localhost:8080/products/uploadimage",
-          data,
-          {
-            headers: {
-              Authorization: `Bearer ${user.Access_token}`, // Ensure correct token
-            },
-          }
-        );
-
-        console.log("Upload successful:", response.data);
-        const imageUrl = response.data.secure_url || response.data.url;
-
-        if (imageUrl) {
-          setUploadedImageUrl(imageUrl); // Update the state with the image URL
-          console.log("Image URL updated:", imageUrl);
-        } else {
-          console.error("Image URL not found in response:", response.data);
-        }
+      const response = await axios.post(
+        "http://localhost:8080/products/uploadimage",
+        data
+      );
+  
+      console.log("Upload successful:", response.data);
+      const imageUrl = response.data.secure_url || response.data.url;
+  
+      if (imageUrl) {
+        setUploadedImageUrl(imageUrl); // Update the state with the image URL
+        console.log("Image URL updated:", imageUrl);
       } else {
-        console.error("User is not authenticated.");
+        console.error("Image URL not found in response:", response.data);
       }
     } catch (error) {
       console.error("Image upload failed:", error);
-      console.error("Error details:", error.response ? error.response.data : error.message);  // Check detailed error response
+      console.error(
+        "Error details:",
+        error.response ? error.response.data : error.message // Check detailed error response
+      );
     } finally {
       setImageLoadingState(false);
     }
   };
+  
 
   // Upload the image to cloudinary and get it link from cloudinary
   useEffect(() => {
@@ -111,46 +104,36 @@ function Products() {
   }, [uploadedImageUrl]);
 
   // Onsubmit method
-    const onSubmit = async (e) => {
-      e.preventDefault();
-    
-      if (imageLoadingState) {
-        alert("Please wait for the image upload to complete.");
-        return;
-      }
-    
-      if (!uploadedImageUrl) {
-        alert("Please upload an image before submitting.");
-        return;
-      }
-    
-      if (user && user.Access_token) {
-        console.log("Form Data before submission:", formData);
-        console.log("Authorization Token:", user.Access_token);
-    
-        try {
-          const result = await axios.post(
-            "http://localhost:8080/products/productCreate",
-            formData,
-            {
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${user.Access_token}`,
-              },
-            }
-          );
-    
-          console.log("Product added successfully:", result.data);
-          setFormData(initialFormData);
-          setUploadedImageUrl("");
-          setImageFile(null);
-        } catch (error) {
-          console.error("Error adding product:", error.response?.data || error.message);
-        }
-      } else {
-        alert("User is not authenticated. Please log in.");
-      }
-    };
+  const onSubmit = async (e) => {
+    e.preventDefault();
+  
+    if (imageLoadingState) {
+      alert("Please wait for the image upload to complete.");
+      return;
+    }
+  
+    if (!uploadedImageUrl) {
+      alert("Please upload an image before submitting.");
+      return;
+    }
+  
+    console.log("Form Data before submission:", formData);
+  
+    try {
+      const result = await axios.post(
+        "http://localhost:8080/products/productCreate",
+        formData
+      );
+  
+      console.log("Product added successfully:", result.data);
+      setFormData(initialFormData);
+      setUploadedImageUrl("");
+      setImageFile(null);
+    } catch (error) {
+      console.error("Error adding product:", error.response?.data || error.message);
+    }
+  };
+  
     
 
   return (

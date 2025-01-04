@@ -18,32 +18,46 @@ function PopupForm({ onClose, productName, productPrice }) {
     setPrice(productPrice); // Set initial price
   }, [productPrice]);
 
-  const handleSubmit = async (e) => {
+
+
+
+  //submit from
+ const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!user) {
       setError("You must be logged in");
       return;
     }
-
-    const orderPayment = { cardNumber, yearMonth, cnn, price, visaMasterCard,productName,productPrice };
+    console.log("user access token",user.id)
+  
+    const orderPayment = {
+      cNumber: cardNumber,
+      yearAndMonth:yearMonth,
+      cnn,
+      price,
+      cType:visaMasterCard,
+      productName,
+      userId: user?.id,
+    };
+    
     
     console.log("User from AuthContext:", user);
     console.log("User context:", user);
 
     console.log("Headers sent:", {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${user?.token}`,
+      Authorization: `Bearer ${user?.Access_token}`,
   });
   
-
-    const response = await fetch("http://localhost:5000/api/order/make", {
+    console.log("data are in from data",orderPayment)
+    const response = await fetch("http://localhost:8080/OrderPlace/OrderCreation", {
       method: "POST",
       body: JSON.stringify(orderPayment),
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${user?.token}`,
-      },
+        Authorization: `Bearer ${user?.Access_token}`,
+      },  
     });
 
     const json = await response.json();
@@ -111,7 +125,7 @@ function PopupForm({ onClose, productName, productPrice }) {
               CNN:
             </label>
             <input
-              type="number"
+              type="text"
               id="cnn"
               value={cnn}
               onChange={(e) => setCnn(e.target.value)}

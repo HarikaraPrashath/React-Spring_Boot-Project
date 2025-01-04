@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import PopupForm from "../components/popupForm/formPopup"; 
+import { useAuthContext } from '../../src/hook/useAuthContext';
 
 function ShoppingDescPage() {
+  const { user } = useAuthContext();
   const { id } = useParams(); // Get the product ID from URL
   const [product, setProduct] = useState(null);
   const [showPopup, setShowPopup] = useState(false); // State to manage popup visibility
@@ -11,9 +13,11 @@ function ShoppingDescPage() {
   // Fetch product details based on the ID
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/api/admin/product/getOne/${id}`)
+      .get(
+      `http://localhost:8080/products/singleProduct/${id}`,
+      )
       .then((response) => {
-        setProduct(response.data.data); // Ensure correct data structure
+        setProduct(response.data  ); // Ensure correct data structure
       })
       .catch((err) => console.error(err));
   }, [id]);
@@ -27,14 +31,14 @@ function ShoppingDescPage() {
       <div className="flex gap-6 bg-white shadow-lg rounded-lg p-8 w-full">
         <div className="flex-[30%]">
           <img
-            src={product.image}
-            alt={product.productName}
+            src={product.imageUrl}
+            alt={product.name}
             className="w-full h-auto rounded-md shadow-md"
           />
         </div>
         <div className="flex-[70%] space-y-6">
           <h2 className="text-3xl font-bold text-gray-800">
-            {product.productName}
+            {product.name}
           </h2>
           <p className="text-xl text-gray-700 font-semibold">
             Rs {product.price}/=
@@ -53,7 +57,7 @@ function ShoppingDescPage() {
       {showPopup && (
         <PopupForm
           onClose={() => setShowPopup(false)} // Close the popup
-          productName={product.productName} // Pass product name as a prop
+          productName={product.name} // Pass product name as a prop
           productPrice={product.price}
         />
       )}
